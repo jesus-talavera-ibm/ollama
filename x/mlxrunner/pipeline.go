@@ -164,7 +164,6 @@ func (r *Runner) TextGenerationPipeline(request Request) error {
 		}
 
 		nextSample, nextLogprobs = step(sample, history)
-
 		mlx.Unpin(sample, logprobs)
 		sample, logprobs = nextSample, nextLogprobs
 		nextSample, nextLogprobs = nil, nil
