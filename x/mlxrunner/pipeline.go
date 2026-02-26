@@ -133,7 +133,7 @@ func (r *Runner) TextGenerationPipeline(request Request) error {
 
 	var b bytes.Buffer
 
-	final := CompletionResponse{Done: true, PromptEvalCount: len(inputs), EvalCount: request.Options.MaxTokens, DoneReason: 1}
+	final := CompletionResponse{Done: true, PromptEvalCount: total, EvalCount: request.Options.MaxTokens, DoneReason: 1}
 	for i := range request.Options.MaxTokens {
 		if err := ctx.Err(); err != nil {
 			return err
