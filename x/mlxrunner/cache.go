@@ -137,8 +137,8 @@ func (c *kvCache) findRemaining(tokens []int32) []int32 {
 		prefix++
 	}
 
-	// Replay the last matching token so the next-token logits are recomputed
-	// from the correct prefix state.
+	// Always keep at least one token to re-evaluate so the
+	// pipeline can seed token generation from it.
 	if prefix == len(tokens) && prefix > 0 {
 		prefix--
 	}

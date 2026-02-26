@@ -77,7 +77,6 @@ func (r *Runner) TextGenerationPipeline(request Request) error {
 	} else {
 		request.Options.MaxTokens = min(request.Options.MaxTokens, maxGenerate)
 	}
-
 	session := r.cache.begin(r.Model, inputs)
 	defer session.close()
 	caches := session.caches
