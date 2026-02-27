@@ -207,6 +207,7 @@ type CompletionResponse struct {
 	PromptEvalDuration time.Duration
 	EvalCount          int
 	EvalDuration       time.Duration
+	PeakMemory         uint64
 
 	Error *api.StatusError
 }
@@ -299,6 +300,7 @@ func (c *Client) Completion(ctx context.Context, req llm.CompletionRequest, fn f
 			PromptEvalDuration: raw.PromptEvalDuration,
 			EvalCount:          raw.EvalCount,
 			EvalDuration:       raw.EvalDuration,
+			PeakMemory:         raw.PeakMemory,
 		}
 
 		fn(cresp)

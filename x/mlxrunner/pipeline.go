@@ -176,6 +176,7 @@ func (r *Runner) TextGenerationPipeline(request Request) error {
 	}
 
 	final.EvalDuration = time.Since(now)
+	final.PeakMemory = uint64(mlx.PeakMemory())
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
