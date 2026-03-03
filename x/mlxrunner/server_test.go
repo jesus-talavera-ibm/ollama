@@ -18,6 +18,7 @@ type stubModel struct{}
 func (stubModel) Forward(*mlx.Array, []cache.Cache) *mlx.Array { return nil }
 func (stubModel) Unembed(*mlx.Array) *mlx.Array                { return nil }
 func (stubModel) NumLayers() int                               { return 0 }
+func (stubModel) MaxContextLength() int                        { return 0 }
 func (stubModel) Tokenizer() *tokenizer.Tokenizer              { return nil }
 func (stubModel) LoadWeights(map[string]*mlx.Array) error      { return nil }
 
