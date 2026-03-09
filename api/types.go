@@ -128,6 +128,13 @@ type GenerateRequest struct {
 	// Valid values are 0-20. Default is 0 (only return the selected token's logprob).
 	TopLogprobs int `json:"top_logprobs,omitempty"`
 
+	// CachePrompt controls whether the KV cache from previous requests is reused
+	// for shared prompt prefixes. When true (default), Ollama skips re-evaluation
+	// of tokens that match a cached prefix, significantly reducing TTFT for
+	// multi-turn conversations and repeated system prompts. Set to false to force
+	// full prompt re-evaluation (useful for deterministic output requirements).
+	CachePrompt *bool `json:"cache_prompt,omitempty"`
+
 	// Experimental: Image generation fields (may change or be removed)
 
 	// Width is the width of the generated image in pixels.
@@ -191,6 +198,13 @@ type ChatRequest struct {
 	// each with an associated log probability. Only applies when Logprobs is true.
 	// Valid values are 0-20. Default is 0 (only return the selected token's logprob).
 	TopLogprobs int `json:"top_logprobs,omitempty"`
+
+	// CachePrompt controls whether the KV cache from previous requests is reused
+	// for shared prompt prefixes. When true (default), Ollama skips re-evaluation
+	// of tokens that match a cached prefix, significantly reducing TTFT for
+	// multi-turn conversations and repeated system prompts. Set to false to force
+	// full prompt re-evaluation (useful for deterministic output requirements).
+	CachePrompt *bool `json:"cache_prompt,omitempty"`
 }
 
 type Tools []Tool
@@ -574,6 +588,7 @@ type Metrics struct {
 	PromptEvalDuration time.Duration `json:"prompt_eval_duration,omitempty"`
 	EvalCount          int           `json:"eval_count,omitempty"`
 	EvalDuration       time.Duration `json:"eval_duration,omitempty"`
+	CachedTokens       int           `json:"cached_tokens,omitempty"`
 }
 
 // Options specified in [GenerateRequest].  If you add a new option here, also

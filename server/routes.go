@@ -545,6 +545,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 			Options:     opts,
 			Shift:       req.Shift == nil || *req.Shift,
 			Truncate:    req.Truncate == nil || *req.Truncate,
+			CachePrompt: req.CachePrompt == nil || *req.CachePrompt,
 			Logprobs:    req.Logprobs,
 			TopLogprobs: req.TopLogprobs,
 		}, func(cr llm.CompletionResponse) {
@@ -558,6 +559,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 					PromptEvalDuration: cr.PromptEvalDuration,
 					EvalCount:          cr.EvalCount,
 					EvalDuration:       cr.EvalDuration,
+					CachedTokens:       cr.CachedTokens,
 				},
 				Logprobs: toAPILogprobs(cr.Logprobs),
 			}
@@ -2303,6 +2305,7 @@ func (s *Server) ChatHandler(c *gin.Context) {
 				Options:     opts,
 				Shift:       req.Shift == nil || *req.Shift,
 				Truncate:    truncate,
+				CachePrompt: req.CachePrompt == nil || *req.CachePrompt,
 				Logprobs:    req.Logprobs,
 				TopLogprobs: req.TopLogprobs,
 			}, func(r llm.CompletionResponse) {
@@ -2316,6 +2319,7 @@ func (s *Server) ChatHandler(c *gin.Context) {
 						PromptEvalDuration: r.PromptEvalDuration,
 						EvalCount:          r.EvalCount,
 						EvalDuration:       r.EvalDuration,
+						CachedTokens:       r.CachedTokens,
 					},
 					Logprobs: toAPILogprobs(r.Logprobs),
 				}

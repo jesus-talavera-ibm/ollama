@@ -104,6 +104,7 @@ type Sequence struct {
 	generationDuration time.Duration
 	numDecoded         int
 	numPromptInputs    int
+	numCachedTokens    int
 }
 
 type NewSequenceParams struct {
@@ -690,13 +691,14 @@ func (s *Server) completion(w http.ResponseWriter, r *http.Request) {
 	found := false
 	for i, sq := range s.seqs {
 		if sq == nil {
-			seq.cache, seq.inputs, err = s.cache.LoadCacheSlot(seq.inputs, true)
+			seq.cache, seq.inputs, err = s.cache.LoadCacheSlot(seq.inputs, req.CachePrompt)
 			if err != nil {
 				s.mu.Unlock()
 				s.seqsSem.Release(1)
 				http.Error(w, fmt.Sprintf("Failed to load cache: %v", err), http.StatusInternalServerError)
 				return
 			}
+			seq.numCachedTokens = seq.numPromptInputs - len(seq.inputs)
 
 			s.seqs[i] = seq
 			s.cond.Signal()
@@ -737,6 +739,7 @@ func (s *Server) completion(w http.ResponseWriter, r *http.Request) {
 					PromptEvalDuration: seq.processingDuration,
 					EvalCount:          seq.numDecoded,
 					EvalDuration:       seq.generationDuration,
+					CachedTokens:       seq.numCachedTokens,
 				}); err != nil {
 					http.Error(w, fmt.Sprintf("failed to encode final response: %v", err), http.StatusInternalServerError)
 				}

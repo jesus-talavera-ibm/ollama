@@ -1462,6 +1462,10 @@ type CompletionRequest struct {
 	Shift    bool
 	Truncate bool
 
+	// CachePrompt controls whether the runner reuses cached KV state for
+	// prompt prefixes that match a previous request. Defaults to true.
+	CachePrompt bool
+
 	// Logprobs specifies whether to include log probabilities in the response
 	Logprobs bool
 
@@ -1518,6 +1522,11 @@ type CompletionResponse struct {
 	PromptEvalDuration time.Duration `json:"prompt_eval_duration"`
 	EvalCount          int           `json:"eval_count"`
 	EvalDuration       time.Duration `json:"eval_duration"`
+
+	// CachedTokens is the number of prompt tokens served from the KV cache
+	// (i.e. not re-evaluated). When this equals PromptEvalCount, the entire
+	// prompt was served from cache.
+	CachedTokens int `json:"cached_tokens,omitempty"`
 
 	// Logprobs contains log probability information if requested
 	Logprobs []Logprob `json:"logprobs,omitempty"`
