@@ -588,7 +588,7 @@ type Metrics struct {
 	PromptEvalDuration time.Duration `json:"prompt_eval_duration,omitempty"`
 	EvalCount          int           `json:"eval_count,omitempty"`
 	EvalDuration       time.Duration `json:"eval_duration,omitempty"`
-	CachedTokens       int           `json:"cached_tokens,omitempty"`
+	CachedTokens       int           `json:"cached_tokens"`
 }
 
 // Options specified in [GenerateRequest].  If you add a new option here, also

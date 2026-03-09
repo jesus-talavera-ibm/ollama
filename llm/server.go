@@ -1526,7 +1526,7 @@ type CompletionResponse struct {
 	// CachedTokens is the number of prompt tokens served from the KV cache
 	// (i.e. not re-evaluated). When this equals PromptEvalCount, the entire
 	// prompt was served from cache.
-	CachedTokens int `json:"cached_tokens,omitempty"`
+	CachedTokens int `json:"cached_tokens"`
 
 	// Logprobs contains log probability information if requested
 	Logprobs []Logprob `json:"logprobs,omitempty"`
