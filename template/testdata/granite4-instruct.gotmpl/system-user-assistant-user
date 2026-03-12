@@ -1,0 +1,5 @@
+<|start_of_role|>system<|end_of_role|>You are a helpful assistant.<|end_of_text|>
+<|start_of_role|>user<|end_of_role|>Hello, how are you?<|end_of_text|>
+<|start_of_role|>assistant<|end_of_role|>I'm doing great. How can I help you today?<|end_of_text|>
+<|start_of_role|>user<|end_of_role|>I'd like to show off how chat templating works!<|end_of_text|>
+<|start_of_role|>assistant<|end_of_role|>

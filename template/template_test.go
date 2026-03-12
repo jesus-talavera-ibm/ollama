@@ -769,3 +769,80 @@ func TestTemplatePropertiesRange(t *testing.T) {
 		t.Errorf("Range over Properties failed, got: %s, want: location:string;", got)
 	}
 }
+
+func TestGranite4ToolAlphabeticalKeys(t *testing.T) {
+	// The granite4 template manually constructs tool JSON with alphabetical key ordering
+	// to match HuggingFace's Python json.dumps. This is critical for granite4:micro (3.4B
+	// dense) multi-tool calling: the model generates only 1 tool call instead of 2 when
+	// "required" appears before "properties" in the tool definition JSON.
+	//
+	// This test verifies the pure Go template approach produces correct key ordering
+	// without requiring a custom jsonAlphaKeys template function.
+	bts, err := os.ReadFile("granite4-instruct.gotmpl")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tmpl, err := Parse(string(bts))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	props := api.NewToolPropertiesMap()
+	props.Set("location", api.ToolProperty{
+		Type:        api.PropertyType{"string"},
+		Description: "The city and state",
+	})
+
+	var buf bytes.Buffer
+	err = tmpl.Execute(&buf, Values{
+		Messages: []api.Message{{Role: "user", Content: "test"}},
+		Tools: api.Tools{{
+			Type: "function",
+			Function: api.ToolFunction{
+				Name:        "get_weather",
+				Description: "Get weather",
+				Parameters: api.ToolFunctionParameters{
+					Type:       "object",
+					Required:   []string{"location"},
+					Properties: props,
+				},
+			},
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	got := buf.String()
+
+	// Verify "properties" comes before "required" in the rendered prompt
+	propsIdx := strings.Index(got, `"properties"`)
+	reqIdx := strings.Index(got, `"required"`)
+	if propsIdx == -1 || reqIdx == -1 {
+		t.Fatalf("expected both 'properties' and 'required' in rendered prompt, got: %s", got)
+	}
+	if propsIdx > reqIdx {
+		t.Errorf("granite4 template: 'properties' should come before 'required' (alphabetical order).\nrendered prompt: %s", got)
+	}
+
+	// Verify "description" comes before "name" in the function object
+	descIdx := strings.Index(got, `"description"`)
+	nameIdx := strings.Index(got, `"name"`)
+	if descIdx == -1 || nameIdx == -1 {
+		t.Fatalf("expected both 'description' and 'name' in rendered prompt, got: %s", got)
+	}
+	if descIdx > nameIdx {
+		t.Errorf("granite4 template: 'description' should come before 'name' (alphabetical order).\nrendered prompt: %s", got)
+	}
+
+	// Verify "function" comes before "type" at the top level
+	funcIdx := strings.Index(got, `"function"`)
+	typeIdx := strings.Index(got, `"type":"function"`)
+	if funcIdx == -1 || typeIdx == -1 {
+		t.Fatalf("expected both 'function' and 'type' in rendered prompt, got: %s", got)
+	}
+	if funcIdx > typeIdx {
+		t.Errorf("granite4 template: 'function' should come before 'type' (alphabetical order).\nrendered prompt: %s", got)
+	}
+}
