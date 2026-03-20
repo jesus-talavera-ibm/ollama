@@ -79,6 +79,8 @@ func ParserForName(name string) Parser {
 		return &GLM47Parser{}
 	case "glm-ocr":
 		return &GlmOcrParser{}
+	case "granite3.3":
+		return &Granite33Parser{}
 	case "lfm2":
 		return &LFM2Parser{hasThinkingSupport: false}
 	case "lfm2-thinking":
