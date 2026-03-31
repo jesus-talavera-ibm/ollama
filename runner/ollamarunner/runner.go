@@ -997,7 +997,7 @@ func (s *Server) completion(w http.ResponseWriter, r *http.Request) {
 					PromptEvalDuration: seq.processingDuration,
 					EvalCount:          seq.numPredicted,
 					EvalDuration:       seq.lastUpdatedAt.Sub(seq.startedAt) - seq.samplingDuration,
-					CachedTokens:       seq.numCachedTokens,
+					CachedTokens:       &seq.numCachedTokens,
 				}); err != nil {
 					http.Error(w, fmt.Sprintf("failed to encode final response: %v", err), http.StatusInternalServerError)
 				}

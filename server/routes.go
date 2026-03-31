@@ -560,6 +560,7 @@ func (s *Server) GenerateHandler(c *gin.Context) {
 					EvalCount:          cr.EvalCount,
 					EvalDuration:       cr.EvalDuration,
 					CachedTokens:       cr.CachedTokens,
+
 				},
 				Logprobs: toAPILogprobs(cr.Logprobs),
 			}
@@ -2320,6 +2321,7 @@ func (s *Server) ChatHandler(c *gin.Context) {
 						EvalCount:          r.EvalCount,
 						EvalDuration:       r.EvalDuration,
 						CachedTokens:       r.CachedTokens,
+
 					},
 					Logprobs: toAPILogprobs(r.Logprobs),
 				}

@@ -769,3 +769,64 @@ func TestTemplatePropertiesRange(t *testing.T) {
 		t.Errorf("Range over Properties failed, got: %s, want: location:string;", got)
 	}
 }
+
+func TestTemplateArgsDeterminism(t *testing.T) {
+	// Verify that templateArgs.String() produces deterministic sorted-key JSON
+	// across multiple calls, which is required for stable prefix cache tokenization.
+	args := templateArgs{
+		"zebra":    "last",
+		"alpha":    "first",
+		"middle":   42,
+		"bravo":    true,
+	}
+
+	first := args.String()
+	for i := 0; i < 100; i++ {
+		got := args.String()
+		if got != first {
+			t.Fatalf("Non-deterministic output on iteration %d: %q != %q", i, got, first)
+		}
+	}
+
+	// Verify key ordering is alphabetical
+	expected := `{"alpha":"first","bravo":true,"middle":42,"zebra":"last"}`
+	if first != expected {
+		t.Errorf("Keys not sorted: got %s, want %s", first, expected)
+	}
+}
+
+func TestTemplatePropertiesDeterminism(t *testing.T) {
+	props := templateProperties{
+		"zebra": api.ToolProperty{Type: api.PropertyType{"string"}, Description: "Z field"},
+		"alpha": api.ToolProperty{Type: api.PropertyType{"integer"}, Description: "A field"},
+	}
+
+	first := props.String()
+	for i := 0; i < 100; i++ {
+		got := props.String()
+		if got != first {
+			t.Fatalf("Non-deterministic output on iteration %d: %q != %q", i, got, first)
+		}
+	}
+
+	// Verify the keys appear in sorted order
+	alphaIdx := strings.Index(first, `"alpha"`)
+	zebraIdx := strings.Index(first, `"zebra"`)
+	if alphaIdx == -1 || zebraIdx == -1 || alphaIdx >= zebraIdx {
+		t.Errorf("Keys not sorted alphabetically in output: %s", first)
+	}
+}
+
+func TestTemplateArgsNil(t *testing.T) {
+	var args templateArgs
+	if got := args.String(); got != "{}" {
+		t.Errorf("nil templateArgs.String() = %q, want {}", got)
+	}
+}
+
+func TestTemplatePropertiesNil(t *testing.T) {
+	var props templateProperties
+	if got := props.String(); got != "{}" {
+		t.Errorf("nil templateProperties.String() = %q, want {}", got)
+	}
+}

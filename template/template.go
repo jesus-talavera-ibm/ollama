@@ -9,7 +9,7 @@ import (
 	"maps"
 	"math"
 	"slices"
-	"sort"
+
 	"strings"
 	"sync"
 	"text/template"
@@ -386,13 +386,13 @@ func (t templateTools) String() string {
 type templateArgs map[string]any
 
 // String returns a deterministic JSON representation with sorted keys.
-// Sorted output ensures consistent tokenization across requests, which is
-// critical for prefix KV cache reuse.
+// encoding/json.Marshal guarantees sorted map keys (Go spec), which ensures
+// consistent tokenization across requests — critical for prefix KV cache reuse.
 func (t templateArgs) String() string {
 	if t == nil {
 		return "{}"
 	}
-	bts, _ := marshalSortedMap(t)
+	bts, _ := json.Marshal(map[string]any(t))
 	return string(bts)
 }
 
@@ -400,36 +400,13 @@ func (t templateArgs) String() string {
 type templateProperties map[string]api.ToolProperty
 
 // String returns a deterministic JSON representation with sorted keys.
+// encoding/json.Marshal guarantees sorted map keys (Go spec).
 func (t templateProperties) String() string {
 	if t == nil {
 		return "{}"
 	}
-	bts, _ := marshalSortedMap(t)
+	bts, _ := json.Marshal(map[string]api.ToolProperty(t))
 	return string(bts)
-}
-
-// marshalSortedMap marshals a map to JSON with keys sorted alphabetically.
-// This ensures deterministic output regardless of Go's random map iteration order.
-func marshalSortedMap[V any](m map[string]V) ([]byte, error) {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	buf := []byte{'{'}
-	for i, k := range keys {
-		if i > 0 {
-			buf = append(buf, ',')
-		}
-		keyBytes, _ := json.Marshal(k)
-		valBytes, _ := json.Marshal(m[k])
-		buf = append(buf, keyBytes...)
-		buf = append(buf, ':')
-		buf = append(buf, valBytes...)
-	}
-	buf = append(buf, '}')
-	return buf, nil
 }
 
 // templateTool is a template-compatible representation of api.Tool
