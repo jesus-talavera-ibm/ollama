@@ -155,6 +155,13 @@ func TestGranite33Parser(t *testing.T) {
 			input:           "<response>Just an answer.</response>",
 			expectedContent: "Just an answer.",
 		},
+		{
+			name:             "empty_thinking_block",
+			input:            "<think></think><response>Answer after empty thinking.</response>",
+			expectedContent:  "Answer after empty thinking.",
+			expectedThinking: "",
+			thinkingEnabled:  true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -327,6 +334,26 @@ func TestGranite33Parser_StreamingEdgeCases(t *testing.T) {
 			expectedContent:  "Content here",
 			expectedThinking: "",
 			thinkingEnabled:  false,
+		},
+		{
+			name: "thinking_then_tool_call",
+			chunks: []string{
+				"<think>Let me check.</think>",
+				`<|tool_call|>[{"name": "get_weather", "arguments": {"city": "NYC"}}]`,
+			},
+			expectedContent:  "",
+			expectedThinking: "Let me check.",
+			expectedToolCalls: []api.ToolCall{
+				{
+					Function: api.ToolCallFunction{
+						Name: "get_weather",
+						Arguments: testArgs(map[string]any{
+							"city": "NYC",
+						}),
+					},
+				},
+			},
+			thinkingEnabled: true,
 		},
 	}
 

@@ -26,9 +26,8 @@ const (
 )
 
 type Granite33Parser struct {
-	state            granite33State
-	buffer           strings.Builder
-	thinkingEnabled  bool
+	state  granite33State
+	buffer strings.Builder
 }
 
 func (p *Granite33Parser) HasToolSupport() bool {
@@ -45,10 +44,8 @@ func (p *Granite33Parser) Init(tools []api.Tool, lastMessage *api.Message, think
 
 	if thinkingEnabled && !prefill && len(tools) == 0 {
 		p.state = granite33CollectingThinking
-		p.thinkingEnabled = true
 	} else {
 		p.state = granite33CollectingContent
-		p.thinkingEnabled = false
 	}
 
 	return tools
@@ -87,6 +84,10 @@ func (p *Granite33Parser) Add(s string, done bool) (content string, thinking str
 			switch p.state {
 			case granite33CollectingThinking:
 				events = append(events, granite33ThinkingEvent{content: remaining})
+			case granite33CollectingToolCalls:
+				slog.Warn("granite33 draining incomplete tool call JSON", "buffer", remaining)
+				remaining = stripResponseTags(remaining)
+				events = append(events, granite33ContentEvent{content: remaining})
 			default:
 				// Strip leftover response tags from remaining content
 				remaining = stripResponseTags(remaining)
