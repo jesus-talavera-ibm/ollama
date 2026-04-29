@@ -503,6 +503,42 @@ func TestLoadCacheSlot(t *testing.T) {
 	}
 }
 
+func TestLoadCacheSlotCachePromptFalse(t *testing.T) {
+	// When cachePrompt=false, the entire prompt should be returned for re-evaluation
+	// even when the cache has a matching prefix.
+	cache := InputCache{
+		multiUserCache: false,
+		slots: []InputCacheSlot{
+			{
+				Id:       0,
+				Inputs:   []*input.Input{{Token: 1}, {Token: 2}, {Token: 3}},
+				InUse:    false,
+				lastUsed: time.Now().Add(-time.Second),
+			},
+		},
+	}
+
+	prompt := []*input.Input{{Token: 1}, {Token: 2}, {Token: 3}, {Token: 4}}
+	slot, remaining, err := cache.LoadCacheSlot(prompt, false)
+	if err != nil {
+		t.Fatalf("LoadCacheSlot() error = %v", err)
+	}
+
+	if slot.Id != 0 {
+		t.Errorf("expected slot 0, got %d", slot.Id)
+	}
+
+	// With cachePrompt=false, all tokens should remain for evaluation
+	if len(remaining) != len(prompt) {
+		t.Errorf("expected all %d tokens remaining, got %d", len(prompt), len(remaining))
+	}
+
+	// The cache slot should have no cached inputs
+	if len(slot.Inputs) != 0 {
+		t.Errorf("expected 0 cached inputs, got %d", len(slot.Inputs))
+	}
+}
+
 // Mock implementation of the Cache interface
 type mockCache struct {
 	shouldFail bool

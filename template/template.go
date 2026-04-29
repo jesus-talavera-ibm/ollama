@@ -9,6 +9,7 @@ import (
 	"maps"
 	"math"
 	"slices"
+
 	"strings"
 	"sync"
 	"text/template"
@@ -384,22 +385,27 @@ func (t templateTools) String() string {
 // templateArgs is a map type with JSON string output for templates.
 type templateArgs map[string]any
 
+// String returns a deterministic JSON representation with sorted keys.
+// encoding/json.Marshal guarantees sorted map keys (Go spec), which ensures
+// consistent tokenization across requests — critical for prefix KV cache reuse.
 func (t templateArgs) String() string {
 	if t == nil {
 		return "{}"
 	}
-	bts, _ := json.Marshal(t)
+	bts, _ := json.Marshal(map[string]any(t))
 	return string(bts)
 }
 
 // templateProperties is a map type with JSON string output for templates.
 type templateProperties map[string]api.ToolProperty
 
+// String returns a deterministic JSON representation with sorted keys.
+// encoding/json.Marshal guarantees sorted map keys (Go spec).
 func (t templateProperties) String() string {
 	if t == nil {
 		return "{}"
 	}
-	bts, _ := json.Marshal(t)
+	bts, _ := json.Marshal(map[string]api.ToolProperty(t))
 	return string(bts)
 }
 
